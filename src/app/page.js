@@ -1,95 +1,154 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+
+// import styles from './page.module.css'
+import { useEffect, useState } from "react";
+import { getAllBooks } from "@/fetch/books";
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  TableContainer,
+  Text,
+  Spinner,
+  Stack,
+  Image,
+  Button,
+  Center,
+  Link,
+} from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const fetchBooks = async () => {
+    try {
+      // client-side rendering
+      // load the page first, then retrieve the data
+      const response = await getAllBooks();
+
+      setBooks(response.books);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchBooks();
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <Stack direction="row">
+          <Text fontSize="2xl">Loading...</Text>
+          <Spinner size="lg" />
+        </Stack>
+      </>
+    );
+  }
+
+  // suggestion: make the UI even better by not using tables, try to use cards
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <TableContainer p="20px">
+        <Table variant="striped" colorScheme="blackAlpha">
+          <Thead>
+            <Tr>
+              <Th fontSize="15px" color="black">
+                No
+              </Th>
+              <Th fontSize="15px" color="black">
+                Title
+              </Th>
+              <Th fontSize="15px" color="black">
+                Author
+              </Th>
+              <Th fontSize="15px" color="black">
+                Publisher
+              </Th>
+              <Th fontSize="15px" color="black">
+                Year
+              </Th>
+              <Th fontSize="15px" color="black">
+                Pages
+              </Th>
+              <Th fontSize="15px" color="black">
+                Image
+              </Th>
+              <Th fontSize="15px" color="black">
+                Action
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {books.map((book, index) => {
+              return (
+                <Tr key={index}>
+                  <Td>{index + 1}</Td>
+                  <Td>
+                    <Link
+                      color="blue.400"
+                      href={`http://localhost:3000/books/${book.id}`}
+                    >
+                      {book.title}
+                    </Link>
+                  </Td>
+                  <Td>{book.author}</Td>
+                  <Td>{book.publisher}</Td>
+                  <Td>{book.year}</Td>
+                  <Td>{book.pages}</Td>
+                  <Td>
+                    <Image
+                      boxSize="150px"
+                      objectFit="contain"
+                      src={`http://localhost:3000/${book.image}`}
+                      fallbackSrc="https://via.placeholder.com/150"
+                    />
+                  </Td>
+                  <Td>
+                    <Stack>
+                      <Button
+                        color="white"
+                        bgColor="gray.500"
+                        onClick={() => router.push(`/books/${book.id}/edit`)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        colorScheme="red"
+                        onClick={() => {
+                          router.push(`/books/${book.id}/delete`);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  </Td>
+                </Tr>
+              );
+            })}
+          </Tbody>
+        </Table>
+      </TableContainer>
+      <Center>
+        <Button
+          bgGradient="linear(to-l, black, blue.700)"
+          boxShadow="sm"
+          color="white"
+          onClick={() => router.push("/books/create")}
+          mb="100px"
         >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+          Add New Book
+        </Button>
+      </Center>
+    </>
+  );
 }
